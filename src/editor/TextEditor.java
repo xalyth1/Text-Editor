@@ -15,6 +15,11 @@ public class TextEditor extends JFrame {
     JButton loadButton;
     JButton saveButton;
     String dir = System.getProperty("user.dir") + "\\Text Editor\\task\\src\\";
+    private JMenuBar jMenuBar;
+    private JMenu fileJMenu;
+    private JMenuItem loadJMenuItem;
+    private JMenuItem saveJMenuItem;
+    private JMenuItem exitJMenuItem;
 
     public TextEditor() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -48,12 +53,10 @@ public class TextEditor extends JFrame {
         saveButton.addActionListener(e -> {
             String path = jTextField.getText();
 
-            FileOutputStream fos = null;
-
             try {
-                fos = new FileOutputStream(path);
+                FileOutputStream fos = new FileOutputStream(path);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
-                bos.write(jTextArea.getText().getBytes()); // in loop probably
+                bos.write(jTextArea.getText().getBytes());
                 bos.close();
             } catch (IOException exception ) {
                 exception.printStackTrace();
@@ -79,6 +82,8 @@ public class TextEditor extends JFrame {
         JPanel jPanel = new JPanel();
         jPanel.add(jScrollPane);
 
+        createMenu();
+
         setLayout(new BorderLayout());
 
         add(northPanel, BorderLayout.NORTH);
@@ -87,12 +92,38 @@ public class TextEditor extends JFrame {
         pack();
     }
 
+    private void createMenu() {
+        jMenuBar = new JMenuBar();
+        setJMenuBar(jMenuBar);
+
+        fileJMenu = new JMenu("File");
+        loadJMenuItem = new JMenuItem("Load");
+        saveJMenuItem = new JMenuItem("Save");
+        exitJMenuItem = new JMenuItem("Exit");
+
+        jMenuBar.add(fileJMenu);
+        fileJMenu.add(loadJMenuItem);
+        fileJMenu.add(saveJMenuItem);
+        fileJMenu.add(exitJMenuItem);
+
+        //System.out.println("listeners:" + loadButton.getActionListeners().length);
+        loadJMenuItem.addActionListener(loadButton.getActionListeners()[0]);
+        saveJMenuItem.addActionListener(saveButton.getActionListeners()[0]);
+        exitJMenuItem.addActionListener(e -> System.exit(0));
+
+    }
+
     private void setNames() {
         jTextArea.setName("TextArea");
         jTextField.setName("FilenameField");
         loadButton.setName("LoadButton");
         saveButton.setName("SaveButton");
         jScrollPane.setName("ScrollPane");
+
+        fileJMenu.setName("MenuFile");
+        loadJMenuItem.setName("MenuLoad");
+        saveJMenuItem.setName("MenuSave");
+        exitJMenuItem.setName("MenuExit");
     }
 
     void sleep(int x) {
