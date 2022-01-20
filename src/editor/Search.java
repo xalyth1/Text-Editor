@@ -21,8 +21,7 @@ public class Search extends Thread{
     }
 
     public void run() {
-        //Pattern pattern = Pattern.compile(".*" + searchString + ".*");
-        Pattern pattern = Pattern.compile(searchString);
+        Pattern pattern = Pattern.compile(regex ? searchString : Pattern.quote(searchString));
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
             int start = matcher.start();
@@ -30,7 +29,6 @@ public class Search extends Thread{
             String str = matcher.group();
             result.add(new Indices(str, start, end));
         }
-
         this.searchFinished = true;
     }
 
