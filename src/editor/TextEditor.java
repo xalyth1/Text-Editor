@@ -8,25 +8,24 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 
 public class TextEditor extends JFrame {
-
     private LinkedList<Search.Indices> list;
     private int currentResultIndex = 0;
 
-    JTextArea jTextArea;
-    JScrollPane jScrollPane;
+    private JTextArea jTextArea;
+    private JScrollPane jScrollPane;
 
-    JTextField jTextField;
-    JButton loadButton;
-    JButton saveButton;
+    private JTextField jTextField;
+    private JButton loadButton;
+    private JButton saveButton;
     private JButton searchButton;
     private JButton nextButton;
     private JButton previousButton;
     private JCheckBox jCheckBox;
-    private JLabel jLabel;
+    private JLabel useRegexJLabel = new JLabel("Use regex");
 
     private IconManager iconManager = new IconManager();
 
-    JFileChooser jfc = new JFileChooser(System.getProperty("user.dir"));
+    private JFileChooser jFileChooser = new JFileChooser(System.getProperty("user.dir"));
 
     //String dir = System.getProperty("user.dir");
     private JMenuBar jMenuBar;
@@ -39,8 +38,7 @@ public class TextEditor extends JFrame {
     private JMenuItem startSearchItem;
     private JMenuItem previousItem;
     private JMenuItem nextItem;
-    private JMenuItem useregexItem;
-
+    private JMenuItem useRegexItem;
 
     public TextEditor() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -56,13 +54,11 @@ public class TextEditor extends JFrame {
 
         loadButton.addActionListener(e -> {
             System.out.println("Loading file...");
-
             synchronized (this) {
-                int returnValue = jfc.showOpenDialog(null);
-                // int returnValue = jfc.showSaveDialog(null);
+                int returnValue = jFileChooser.showOpenDialog(null);
 
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = jfc.getSelectedFile();
+                    File selectedFile = jFileChooser.getSelectedFile();
 
                     System.out.println("   Selelected file: " + selectedFile.toString());
 
@@ -71,11 +67,9 @@ public class TextEditor extends JFrame {
                     if (selectedFile.exists()) {
                         System.out.println("Selected file exists");
                         try {
-                            String str = Files.readString(Paths.get(path));
+                            //String str = Files.readString(Paths.get(path));
                             byte[] bytes = Files.readAllBytes(Paths.get(path));
-
                             jTextArea.setText(new String(bytes));
-
                         } catch (IOException exception) {
                             exception.printStackTrace();
                         }
@@ -84,14 +78,13 @@ public class TextEditor extends JFrame {
                     }
                 }
             }
-
         });
 
         saveButton.addActionListener(e -> {
-            int returnValue = jfc.showSaveDialog(null);
+            int returnValue = jFileChooser.showSaveDialog(null);
 
             if (returnValue == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = jfc.getSelectedFile();
+                File selectedFile = jFileChooser.getSelectedFile();
                 String path = selectedFile.getAbsolutePath();
 
                 System.out.println("Path to save file: " + path);
@@ -175,21 +168,16 @@ public class TextEditor extends JFrame {
         });
 
         jCheckBox = new JCheckBox();
-        jLabel = new JLabel("Use regex");
 
         jTextArea = new JTextArea();
         jTextArea.setFont(new Font("Arial Black", Font.BOLD, 18));
 
-
         jScrollPane = new JScrollPane(jTextArea);
 
         jScrollPane.setPreferredSize(new Dimension(600, 500));
-        //jScrollPane.setVerticalScrollBar(new JScrollBar(Adjustable.VERTICAL));
-
 
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new FlowLayout());
-        //northPanel.setAlignmentX(0);
         northPanel.add(loadButton);
         northPanel.add(saveButton);
         northPanel.add(jTextField);
@@ -197,14 +185,14 @@ public class TextEditor extends JFrame {
         northPanel.add(previousButton);
         northPanel.add(nextButton);
         northPanel.add(jCheckBox);
-        northPanel.add(jLabel);
+        northPanel.add(useRegexJLabel);
 
         JPanel jPanel = new JPanel();
         jPanel.add(jScrollPane);
 
         createMenu();
 
-        add(jfc);
+        add(jFileChooser);
 
         setLayout(new BorderLayout());
 
@@ -212,7 +200,6 @@ public class TextEditor extends JFrame {
         add(jPanel, BorderLayout.CENTER);
 
         setNames();
-
         pack();
     }
 
@@ -236,17 +223,51 @@ public class TextEditor extends JFrame {
         startSearchItem = new JMenuItem("Start search");
         previousItem = new JMenuItem("Previous match");
         nextItem = new JMenuItem("Next match");
-        useregexItem = new JMenuItem("Use regular expressions");
+        useRegexItem = new JMenuItem("Use regular expressions");
 
         jSearchMenu.add(startSearchItem);
         jSearchMenu.add(previousItem);
         jSearchMenu.add(nextItem);
-        jSearchMenu.add(useregexItem);
+        jSearchMenu.add(useRegexItem);
+
+        JMenu viewMenu = new JMenu("View");
+        jMenuBar.add(viewMenu);
+
+
+        JMenuItem largerFontMenuItem = new JMenuItem("Increase font size");
+        viewMenu.add(largerFontMenuItem);
+        largerFontMenuItem.addActionListener(e -> {
+            int size = jTextArea.getFont().getSize();
+            String fontName = jTextArea.getFont().getFontName();
+            int style = jTextArea.getFont().getStyle();
+            jTextArea.setFont(new Font(fontName, style,size + 2));
+        });
+
+        JMenuItem smallerFontMenuItem = new JMenuItem("Decrease font size");
+        viewMenu.add(smallerFontMenuItem);
+        smallerFontMenuItem.addActionListener(e -> {
+            int size = jTextArea.getFont().getSize();
+            String fontName = jTextArea.getFont().getFontName();
+            int style = jTextArea.getFont().getStyle();
+            jTextArea.setFont(new Font(fontName, style,size - 2));
+        });
+
+        JMenuItem changeFontColorMenuItem = new JMenuItem("Change font color");
+        viewMenu.add(changeFontColorMenuItem);
+        changeFontColorMenuItem.addActionListener(e ->
+            jTextArea.setForeground(JColorChooser.showDialog(null, "Choose Font Color", Color.BLACK)));
+
+        JMenuItem changeBackgroundColorMenuItem = new JMenuItem("Change text background color");
+        viewMenu.add(changeBackgroundColorMenuItem);
+        changeBackgroundColorMenuItem.addActionListener(e ->
+            jTextArea.setBackground(JColorChooser.showDialog(null, "Choose Font Color", Color.BLACK)));
+
+
 
         startSearchItem.addActionListener(searchButton.getActionListeners()[0]);
         previousItem.addActionListener(previousButton.getActionListeners()[0]);
         nextItem.addActionListener(nextButton.getActionListeners()[0]);
-        useregexItem.addActionListener(e -> jCheckBox.setSelected(!jCheckBox.isSelected()));
+        useRegexItem.addActionListener(e -> jCheckBox.setSelected(!jCheckBox.isSelected()));
 
         //System.out.println("listeners:" + loadButton.getActionListeners().length);
         loadJMenuItem.addActionListener(loadButton.getActionListeners()[0]);
@@ -272,8 +293,8 @@ public class TextEditor extends JFrame {
         previousButton.setName("PreviousMatchButton");
         nextButton.setName("NextMatchButton");
         jCheckBox.setName("UseRegExCheckbox");
-        jfc.setName("FileChooser");
-        useregexItem.setName("MenuUseRegExp");
+        jFileChooser.setName("FileChooser");
+        useRegexItem.setName("MenuUseRegExp");
 
         jSearchMenu.setName("MenuSearch");
         startSearchItem.setName("MenuStartSearch");
@@ -288,9 +309,9 @@ public class TextEditor extends JFrame {
         exitJMenuItem.setName("MenuExit");
     }
 
-    void sleep(int x) {
+    void sleep(int timeInMillis) {
         try {
-            Thread.sleep(x);
+            Thread.sleep(timeInMillis);
         } catch (Exception e) {
             e.printStackTrace();
         }
